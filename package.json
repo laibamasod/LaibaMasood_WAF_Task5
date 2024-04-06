@@ -1,0 +1,15 @@
+{
+  "name": "laibamasood_waf_task5",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Mongo_LaibaMasood.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "laiba",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "mongoose": "^8.0.0"
+  }
+}

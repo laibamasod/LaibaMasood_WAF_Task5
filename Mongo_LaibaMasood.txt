@@ -1,0 +1,65 @@
+1.  use LaibaMasood_database
+2. db.createCollection("personals_collection")
+3. db.personals_collection.insertMany([
+  { registration_number: 1, name: "Nasir", city: "Rawalpindi" },
+  { registration_number: 2, name: "Amna", city: "Lahore" },
+  { registration_number: 3, name: "Jaria", city: "Karachi" },
+  { registration_number: 4, name: "Nehal", city: "Rawalpindi" },
+  { registration_number: 5, name: "Aymen", city: "Islamabad" }
+])
+4. db.createCollection("academics_collection")
+5. db.academics_collection.insertMany([
+...   { registration_number: 1, degree_enrolled: "Bachelor", enrollment_year: 2018, favorite_course: "Math" },
+...   { registration_number: 2, degree_enrolled: "Master", enrollment_year: 2019, favorite_course: "History" },
+...   { registration_number: 3, degree_enrolled: "Bachelor", enrollment_year: 2020, favorite_course: "Physics" },
+...   { registration_number: 4, degree_enrolled: "Master", enrollment_year: 2019, favorite_course: "Computer Science" },
+...   { registration_number: 5, degree_enrolled: "Bachelor", enrollment_year: 2018, favorite_course: "Economics" }
+... ])
+6.  db.personals_collection.find()
+   db.academics_collection.find()
+7. db.personals_collection.find({ city: "Rawalpindi" }, { name: 1 })
+8. db.personals_collection.aggregate([
+...   {
+...     $lookup: {
+...       from: "academics_collection", // The collection to join with
+...       localField: "registration_number", // The field in the personals_collection
+...       foreignField: "registration_number", // The field in the academics_collection
+...       as: "student_academics" // Alias for the joined data
+...     }
+...   },
+...   {
+...     $unwind: "$student_academics" // Unwind the array created by the lookup
+...   },
+...   {
+...     $match: {
+...       "student_academics.enrollment_year": 2019 // Filter for students enrolled in 2019
+...     }
+...   },
+...   {
+...     $project: {
+...       _id: 0, // Exclude the _id field
+...       name: 1, // Include the name field
+...       registration_number: 0 // exclude the registration_number field
+...     }
+...   }
+... ])
+
+9. db.personals_collection.updateMany(
+...   { city: { $in: ["Rawalpindi", "Islamabad"] } },
+...   { $set: { city: "Rawalpindi/Islamabad" } }
+... )
+
+10. const studentsToDelete = db.academics_collection.find({ enrollment_year: { $lt: 2019 } }, { registration_number: 1 }).toArray();
+
+// studentsToDelete displays :  
+//{ _id: ObjectId("654362cc30958056b15c47b7"), registration_number: 1 },
+//{ _id: ObjectId("654362cc30958056b15c47bb"), registration_number: 5 }
+
+const registrationNumbersToDelete = studentsToDelete.map(student => student.registration_number);
+// displays as array [1,5]
+
+db.personals_collection.deleteMany({ registration_number: { $in: registrationNumbersToDelete } });
+// deleteCount 2
+
+db.academics_collection.deleteMany({ registration_number: { $in: registrationNumbersToDelete } });
+// deleteCount 2
